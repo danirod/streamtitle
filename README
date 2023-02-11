@@ -1,0 +1,65 @@
+StreamTitle
+
+  StreamTitle is a little tool that I made so that I can change my stream
+  information from the command line. And if you configure it properly, so it
+  can for you.
+
+How to configure
+
+    Go to the Twitch Developer Console at https://dev.twitch.tv/console and
+    create a new application. The OAuth redirection URL must be set to
+    <http://localhost:9300/st-callback>. Aside from that, you can call the
+    application whatever you want. Grab the client ID and the client secret.
+
+    Run StreamTitle using the `-env` parameter to print the location to the
+    config file. You can use this to know where to place the configuration
+    variables:
+
+        nano "$(streamtitle -env)"
+
+    Use the following template, but fill the variables according to the guide
+    below:
+
+        CHANNEL_LOGIN"
+        CLIENT_ID=
+        CLIENT_SECRET=
+
+    * CLIENT_LOGIN: your Twitch username (for instance, "ibai")
+    * CLIENT_ID: the client ID you got from the application
+    * CLIENT_SECRET: the client secret you got from the application
+
+How to use
+
+    On first start, or if the refresh token expires or gets invalidated, you
+    will be asked to login again or authorize the application. It will print an
+    URL, open it on your browser and authorize the application.
+
+    To test the token connection, you can print your stream information:
+
+        streamtitle -verbose
+
+        Current stream information:
+               Title: Golang development
+                Game: 1469308723
+            Language: en
+                Tags: [Golang Terminal Development]
+
+    You can use one or many flags to change the stream information. You might
+    need to pass the values in quotes to prevent weird things from happening.
+
+    * `-title`: set the new stream title: `streamtitle -title "cooking pasta"`
+    * `-game`: set the stream category; you need the category ID (there are
+      Google searches that can tell you the category ID): `streamtitle -game
+      509670`
+    * `-lang`: set the stream language; use two character ISO code:
+      `streamtitle -lang es`
+    * `-tags`: set the stream tags; provide up to ten alphanumerical strings
+      separated by commas, no spaces: `streamtitle -tags SafeSpace,Role,Retro`
+
+    If you also provide the `-verbose` flag, you will see the old and the new
+    stream information, in case you want to save it for later (restoring old
+    settings, maybe?)
+
+    A more complete example:
+
+        streamtitle -verbose -title "cooking pasta" -game 509670 -lang en
