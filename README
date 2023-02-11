@@ -8,7 +8,7 @@ How to configure
 
     Go to the Twitch Developer Console at https://dev.twitch.tv/console and
     create a new application. The OAuth redirection URL must be set to
-    <http://localhost:9300/st-callback>. Aside from that, you can call the
+    http://localhost:9300/st-callback but aside from that, you can call the
     application whatever you want. Grab the client ID and the client secret.
 
     Run StreamTitle using the `-env` parameter to print the location to the
@@ -20,13 +20,19 @@ How to configure
     Use the following template, but fill the variables according to the guide
     below:
 
-        CHANNEL_LOGIN"
+        CHANNEL_LOGIN=
         CLIENT_ID=
         CLIENT_SECRET=
 
     * CLIENT_LOGIN: your Twitch username (for instance, "ibai")
     * CLIENT_ID: the client ID you got from the application
     * CLIENT_SECRET: the client secret you got from the application
+
+    Something like:
+
+        CHANNEL_LOGIN=ibai
+        CLIENT_ID=xxxxxxxxx
+        CLIENT_SECRET=yyyyyyyyyy
 
 How to use
 
