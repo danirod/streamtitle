@@ -20,17 +20,14 @@ How to configure
     Use the following template, but fill the variables according to the guide
     below:
 
-        CHANNEL_LOGIN=
         CLIENT_ID=
         CLIENT_SECRET=
 
-    * CLIENT_LOGIN: your Twitch username (for instance, "ibai")
     * CLIENT_ID: the client ID you got from the application
     * CLIENT_SECRET: the client secret you got from the application
 
     Something like:
 
-        CHANNEL_LOGIN=ibai
         CLIENT_ID=xxxxxxxxx
         CLIENT_SECRET=yyyyyyyyyy
 

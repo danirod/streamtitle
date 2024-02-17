@@ -2,7 +2,11 @@
 
 package main
 
-import "github.com/nicklaw5/helix/v2"
+import (
+	"errors"
+
+	"github.com/nicklaw5/helix/v2"
+)
 
 // Client is the data structure that groups all the program state.
 type Client struct {
@@ -46,18 +50,25 @@ func (ctx *Client) Login() error {
 	ctx.accessToken = <-callback
 	ctx.client.SetUserAccessToken(ctx.accessToken)
 
-	// Since any API method will require the broadcast ID, do it now.
-	return ctx.fetchBroadcastId()
+	bid, err := ctx.getTokenOwner()
+	if err != nil {
+		return err
+	}
+	ctx.broadcastId = bid
+	return nil
 }
 
-func (ctx *Client) fetchBroadcastId() error {
-	resp, err := ctx.client.GetUsers(&helix.UsersParams{
-		Logins: []string{ctx.config.channelLogin},
-	})
-	if err == nil {
-		ctx.broadcastId = resp.Data.Users[0].ID
+// Uses the validation endpoint to check the token information, and as
+// a side effect it serves as a validation that the token is OK.
+func (ctx *Client) getTokenOwner() (string, error) {
+	valid, resp, err := ctx.client.ValidateToken(ctx.accessToken)
+	if err != nil {
+		return "", err
 	}
-	return err
+	if !valid {
+		return "", errors.New("The token is not valid")
+	}
+	return resp.Data.UserID, nil
 }
 
 // AuthorizationURL will build the URL that the user has to visit in order
