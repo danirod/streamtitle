@@ -4,14 +4,18 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+)
+
+var (
+	logger = log.Default()
 )
 
 func main() {
 	flags := initRequestFlags()
-	if flags.printEnv {
-		fmt.Println(configFile())
-		return
+	if !flags.verbose {
+		logger.SetOutput(io.Discard)
 	}
 
 	// Quick shortcut if no task is requested from the tool.

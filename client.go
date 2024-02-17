@@ -45,22 +45,27 @@ func NewContext() (*Client, error) {
 // token in the client context which can be used by further API calls made
 // within the client.
 func (ctx *Client) Login() error {
+	logger.Print("Prepare for login")
+
 	callback := make(chan string)
 	go createTokenProvider(ctx, callback)
 	ctx.accessToken = <-callback
 	ctx.client.SetUserAccessToken(ctx.accessToken)
+	logger.Print("Access token has been set")
 
 	bid, err := ctx.getTokenOwner()
 	if err != nil {
 		return err
 	}
 	ctx.broadcastId = bid
+	logger.Print("Broadcast ID set to ", bid)
 	return nil
 }
 
 // Uses the validation endpoint to check the token information, and as
 // a side effect it serves as a validation that the token is OK.
 func (ctx *Client) getTokenOwner() (string, error) {
+	logger.Print("Validating access token...")
 	valid, resp, err := ctx.client.ValidateToken(ctx.accessToken)
 	if err != nil {
 		return "", err
@@ -68,6 +73,7 @@ func (ctx *Client) getTokenOwner() (string, error) {
 	if !valid {
 		return "", errors.New("The token is not valid")
 	}
+	logger.Print("Access token belongs to ", resp.Data.Login)
 	return resp.Data.UserID, nil
 }
 
@@ -87,6 +93,7 @@ func (ctx *Client) AuthorizationURL(state string) string {
 // and it will store the information in the stream information part of the
 // client context.
 func (ctx *Client) FetchStreamInfo() error {
+	logger.Print("Fetching stream information...")
 	resp, err := ctx.client.GetChannelInformation(&helix.GetChannelInformationParams{
 		BroadcasterIDs: []string{ctx.broadcastId},
 	})
@@ -100,6 +107,12 @@ func (ctx *Client) FetchStreamInfo() error {
 // stream information in the context. If this was previously set by calls
 // to the setters, it will update the stream information.
 func (ctx *Client) SendStreamInfo() error {
+	logger.Print("Updating stream information...")
+	logger.Print("New title: ", ctx.streamInfo.title)
+	logger.Print("New game ID: ", ctx.streamInfo.game)
+	logger.Print("New language: ", ctx.streamInfo.language)
+	logger.Print("Tag list: ", ctx.streamInfo.tags)
+
 	_, err := ctx.client.EditChannelInformation(&helix.EditChannelInformationParams{
 		BroadcasterID:       ctx.broadcastId,
 		Title:               ctx.streamInfo.title,

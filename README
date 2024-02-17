@@ -11,14 +11,10 @@ How to configure
     http://localhost:9300/st-callback but aside from that, you can call the
     application whatever you want. Grab the client ID and the client secret.
 
-    Run StreamTitle using the `-env` parameter to print the location to the
-    config file. You can use this to know where to place the configuration
-    variables:
-
-        nano "$(streamtitle -env)"
-
-    Use the following template, but fill the variables according to the guide
-    below:
+    Create a file in $XDG_CONFIG_DIR/StreamTitle/StreamTitle.env with the
+    following two lines, having the values that are described below.
+    On macOS, the StreamTitle.env configuration file has to be created in
+    ~/Library/Application Support/StreamTitle/StreamTitle.env.
 
         CLIENT_ID=
         CLIENT_SECRET=

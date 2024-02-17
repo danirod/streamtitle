@@ -28,6 +28,8 @@ func configFile() string {
 
 func (cfg *staticConfig) read() error {
 	file := configFile()
+	logger.Print("Reading config file from ", file)
+
 	conf, err := godotenv.Read(file)
 	if err != nil {
 		return err
@@ -41,6 +43,8 @@ func (cfg *staticConfig) read() error {
 
 func (cfg *staticConfig) write() error {
 	path := configFile()
+	logger.Print("Updating config file at ", path)
+
 	data := map[string]string{
 		CLIENT_ID:     cfg.clientId,
 		CLIENT_SECRET: cfg.clientSecret,
