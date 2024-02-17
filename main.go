@@ -2,8 +2,10 @@
 
 package main
 
-import "log"
-import "fmt"
+import (
+	"fmt"
+	"log"
+)
 
 func main() {
 	flags := initRequestFlags()
@@ -36,7 +38,7 @@ func main() {
 	}
 }
 
-func newContext() *Context {
+func newContext() *Client {
 	context, err := NewContext()
 	if err != nil {
 		log.Fatal(err)

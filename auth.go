@@ -2,10 +2,12 @@
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
 
-import "net/http"
-import "github.com/matoous/go-nanoid/v2"
+	gonanoid "github.com/matoous/go-nanoid/v2"
+)
 
 // An internal data structure just to pass two variables between channels.
 // There are other solutions in Go to pass multiple variables through the
@@ -17,7 +19,7 @@ type loginTokens struct {
 // Use this goroutine to asyncally fetch an access token. The caller thread
 // will be blocked until the channel yields the proper access token. In
 // case of emergency, this goroutine will handle the panic.
-func createTokenProvider(client *Context, done chan string) {
+func createTokenProvider(client *Client, done chan string) {
 	if client.config.refreshToken == "" {
 		// Find a fresh pair of tokens since we don't have one.
 		receiver := make(chan loginTokens)
@@ -47,7 +49,7 @@ func createTokenProvider(client *Context, done chan string) {
 
 // Use the refresh token stored in the client context to get a new pair of
 // access and refresh token that we can use for this session.
-func useRefreshToken(client *Context) (*loginTokens, error) {
+func useRefreshToken(client *Client) (*loginTokens, error) {
 	resp, err := client.client.RefreshUserAccessToken(client.config.refreshToken)
 	if err != nil {
 		return nil, err
@@ -66,7 +68,7 @@ func useRefreshToken(client *Context) (*loginTokens, error) {
 // flow can be made from the command line. This goroutine will block the
 // caller, print a Twitch authorization URL to the stdout, and wait until
 // the internal web server receives the redirection from the Twitch OAuth.
-func spawnAuthorizationServer(client *Context, done chan loginTokens) {
+func spawnAuthorizationServer(client *Client, done chan loginTokens) {
 	// State parameter to be used in the OAuth flow.
 	state, _ := gonanoid.New()
 
