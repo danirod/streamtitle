@@ -22,8 +22,8 @@ func main() {
 
 	context := newContext()
 	if flags.printCurrent {
-		fmt.Println("Current stream information:")
 		context.streamInfo.printInfo()
+		return
 	}
 	if flags.changing() {
 		context.streamInfo.setTitle(flags.newTitle)

@@ -37,9 +37,10 @@ How to use
     will be asked to login again or authorize the application. It will print an
     URL, open it on your browser and authorize the application.
 
-    To test the token connection, you can print your stream information:
+    To test the token connection, you can print your stream information
+    with the -current flag.
 
-        streamtitle -verbose
+        streamtitle -current
 
         Current stream information:
                Title: Golang development
@@ -59,10 +60,6 @@ How to use
     * `-tags`: set the stream tags; provide up to ten alphanumerical strings
       separated by commas, no spaces: `streamtitle -tags SafeSpace,Role,Retro`
 
-    If you also provide the `-verbose` flag, you will see the old and the new
-    stream information, in case you want to save it for later (restoring old
-    settings, maybe?)
-
     A more complete example:
 
-        streamtitle -verbose -title "cooking pasta" -game 509670 -lang en
+        streamtitle -title "cooking pasta" -game 509670 -lang en

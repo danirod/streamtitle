@@ -16,7 +16,7 @@ type requestFlags struct {
 func initRequestFlags() requestFlags {
 	flags := requestFlags{}
 	flag.BoolVar(&flags.printEnv, "env", false, "Whether to print the ENV file location")
-	flag.BoolVar(&flags.printCurrent, "verbose", false, "Whether to print the current and new stream info")
+	flag.BoolVar(&flags.printCurrent, "current", false, "Whether to print the current stream information")
 	flag.StringVar(&flags.newTitle, "title", "", "The new title to use for the stream")
 	flag.StringVar(&flags.newCategory, "game", "", "The game ID to use for the stream")
 	flag.StringVar(&flags.newTags, "tags", "", "The new tags to use for the stream, comma separated")
