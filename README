@@ -59,4 +59,76 @@ How to use
 
     A more complete example:
 
-        streamtitle -title "cooking pasta" -game 509670 -lang en
+        streamtitle -title "cooking pasta" -game 509667 -lang en
+
+    If you find yourself switching between two configurations many times
+    (for instance, if you find yourself changing between two categories or
+    reusing the same set of tags or title for different streams), you might
+    want to look into profiles.
+
+    A profile is a prerecorded set of title, category, language and tags,
+    which can be saved in the config file. It is possible to ask StreamTitle
+    to set the channel information from a profile.
+
+    To create a profile, add a table called "profiles". Each nested table
+    defines a profile called with the key of the profile. Each nested table
+    may have up to 4 keys: title (string), language (string), game (number)
+    and tags (string array).
+
+        [profiles.cooking]
+        game = 509667
+        language = 'en'
+        tags = [ 'Cooking', 'Dishes', 'IRL' ]
+
+        [profiles.programming]
+        game = 1469308723
+        tags = ['Programming', 'Golang']
+
+        [profiles.darksouls]
+        game = 490292
+        title = 'Dark Souls 100% no hit run'
+        tags = ['NoHit', 'NoBackseating', 'DarkSouls']
+        language = 'en'
+
+    Properties are not mandatory. You can skip a field, and it will keep the
+    previous value. So for instance if I don't set the language in my profile
+    then it will not update the value for that field; effectively keeping the
+    same language as before.
+
+    To use a profile, use the -profile parameter. It will update the channel
+    information to the contents of the profile that has been set.
+
+        streamtitle -profile darksouls
+
+    You can also merge a profile with inline parameters. Inline parameters
+    always override the profile content, and this is useful for profiles
+    where you just want to change the game and the tags, but you'd want to
+    provide your own title.
+
+        streamtitle -profile programming -title 'Time to program some Go!'
+
+    You can list your available profiles using the following command. It will
+    print each profile name into a separate line.
+
+        streamtitle -list-profiles
+
+Debug
+
+    You can always inspect what is the application is doing by using the
+    -verbose flag, which will print additional messages to the terminal as
+    the program does its things, such as login, update the channel information
+    or report errors.
+
+    You can also use the -dry-run option to avoid updating the stream
+    information. In conjunction, using -verbose -dry-run is a way to check what
+    will the final channel information will be set to without actually
+    changing the values.
+
+        streamtitle -dry-run -verbose -profile cooking -title 'Pizza night'
+        2024/02/18 Fetching stream information...
+        2024/02/18 Updating stream information...
+        2024/02/18 New title: Pizza night
+        2024/02/18 New game ID: 509667
+        2024/02/18 New language: en
+        2024/02/18 Tag list: [Cooking Dishes IRL]
+        2024/02/18 Skipping update because we are running in dry-run mode

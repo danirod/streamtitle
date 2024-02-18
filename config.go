@@ -32,9 +32,33 @@ func credentialsFile() string {
 	return file
 }
 
+type appProfile struct {
+	Game     int      `toml:"game" default:"0"`    // The game ID to use
+	Language string   `toml:"language" default:""` // The language ISO code to use
+	Title    string   `toml:"title" default:""`    // The title to set
+	Tags     []string `toml:"tags" default:""`     // The tags to use
+}
+
 type appConfig struct {
-	ClientId     string `toml:"client_id"`     // The client ID used in OAuth
-	ClientSecret string `toml:"client_secret"` // the client secret used in OAuth
+	ClientId     string                `toml:"client_id"`     // The client ID used in OAuth
+	ClientSecret string                `toml:"client_secret"` // the client secret used in OAuth
+	Profiles     map[string]appProfile `toml:"profiles"`      // A set of profiles already created
+}
+
+func (cfg *appConfig) profiles() []string {
+	profiles := []string{}
+	for p := range cfg.Profiles {
+		profiles = append(profiles, p)
+	}
+	return profiles
+}
+
+func (cfg *appConfig) profile(name string) (*appProfile, bool) {
+	profile, found := cfg.Profiles[name]
+	if found {
+		return &profile, true
+	}
+	return nil, false
 }
 
 func (cfg *appConfig) read() error {

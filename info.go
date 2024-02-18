@@ -30,6 +30,13 @@ func (info *streamInfo) load(resp *helix.ChannelInformation) {
 	info.tags = resp.Tags
 }
 
+func (info *streamInfo) apply(profile *appProfile) {
+	info.setTitle(profile.Title)
+	info.setGame(fmt.Sprintf("%d", profile.Game))
+	info.setLanguage(profile.Language)
+	info.setTagArray(profile.Tags)
+}
+
 func (info *streamInfo) setTitle(title string) {
 	if title != "" {
 		info.title = title

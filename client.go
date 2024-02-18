@@ -166,12 +166,17 @@ func (ctx *Client) FetchStreamInfo() error {
 // SendStreamInfo generates an API call that will submit the currently stored
 // stream information in the context. If this was previously set by calls
 // to the setters, it will update the stream information.
-func (ctx *Client) SendStreamInfo() error {
+func (ctx *Client) SendStreamInfo(dryrun bool) error {
 	logger.Print("Updating stream information...")
 	logger.Print("New title: ", ctx.streamInfo.title)
 	logger.Print("New game ID: ", ctx.streamInfo.game)
 	logger.Print("New language: ", ctx.streamInfo.language)
 	logger.Print("Tag list: ", ctx.streamInfo.tags)
+
+	if dryrun {
+		logger.Print("Skipping update because we are running in dry-run mode")
+		return nil
+	}
 
 	_, err := ctx.client.EditChannelInformation(&helix.EditChannelInformationParams{
 		BroadcasterID:       ctx.broadcastId,

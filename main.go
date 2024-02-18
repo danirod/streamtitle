@@ -20,17 +20,36 @@ func main() {
 	}
 
 	// Quick shortcut if no task is requested from the tool.
-	if !flags.printCurrent && !flags.changing() {
+	if !flags.printCurrent && !flags.listProfiles && !flags.changing() {
 		flags.showUsage()
 		return
 	}
 
 	context := newContext()
+
+	if flags.listProfiles {
+		for _, p := range context.config.profiles() {
+			fmt.Println(p)
+		}
+		return
+	}
+
+	initContext(context)
+
 	if flags.printCurrent {
 		context.streamInfo.printInfo()
 		return
 	}
 	if flags.changing() {
+		if flags.useProfile != "" {
+			profile, found := context.config.profile(flags.useProfile)
+			if found {
+				context.streamInfo.apply(profile)
+			} else {
+				fmt.Println("Error: Profile", flags.useProfile, "not found")
+				os.Exit(1)
+			}
+		}
 		context.streamInfo.setTitle(flags.newTitle)
 		context.streamInfo.setGame(flags.newCategory)
 		context.streamInfo.setTagString(flags.newTags)
@@ -39,7 +58,7 @@ func main() {
 			fmt.Println("New stream information:")
 			context.streamInfo.printInfo()
 		}
-		context.SendStreamInfo()
+		context.SendStreamInfo(flags.dryRun)
 	}
 }
 
@@ -49,6 +68,10 @@ func newContext() *Client {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+	return context
+}
+
+func initContext(context *Client) {
 	if err := context.Login(); err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -57,5 +80,4 @@ func newContext() *Client {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	return context
 }
