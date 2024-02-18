@@ -11,12 +11,38 @@ import (
 
 var (
 	logger = log.Default()
+
+	appVersion = "1.0.12"
 )
 
 func main() {
 	flags := initRequestFlags()
 	if !flags.verbose {
 		logger.SetOutput(io.Discard)
+	}
+
+	if flags.help {
+		fmt.Printf(`%s [...flags]
+
+StreamTitle can be used to show and to change the current information of your
+Twitch channel. On first run, it will ask for login. Once logged in, you can
+use the set of flags to either print the current channel information, or to
+modify the channel information, allowing you to change multiple parameters.
+
+Note that it is currently not possible to change the notification text, since
+the Twitch API does not expose that field. Remember to check on your dashboard
+before going live to make sure that the notification is the one that you want
+to use.
+
+Flags:
+`, os.Args[0])
+		flags.showUsage()
+		return
+	}
+
+	if flags.version {
+		fmt.Println("StreamTitle", appVersion)
+		return
 	}
 
 	// Quick shortcut if no task is requested from the tool.

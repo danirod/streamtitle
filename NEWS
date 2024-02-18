@@ -1,0 +1,67 @@
+News file for StreamTitle.
+
+* StreamTitle 1.0.12 (2024-02-18)
+
+** Breaking change: new configuration file format and location
+
+    The existing .StreamTitle.env file will be ignored starting with
+    this version.
+
+    The configuration file has migrated to a new file called
+    config.toml, which has to be placed in the following location:
+
+    - $HOME/Library/Application Support/StreamTitle/config.toml for
+      macOS.
+
+    - %LOCALAPPDATA%\StreamTitle\config.toml for Microsoft Windows.
+
+    - $XDG_CONFIG_HOME/StreamTitle/config.toml for GNU/Linux and other
+      unices.
+
+    As described in the README, the config file should contain at
+    least the client ID and the client secret for the Twitch
+    application that will manage the connection with the API.
+
+    The refresh token is not stored in the config file
+    anymore. Instead, it will use from now on a separate file that
+    lives in $XDG_STATE_HOME/StreamTitle/credentials.toml for
+    GNU/Linux and other unices but macOS, and on the same directory as
+    config.toml for macOS and Microsoft Windows.
+
+** Breaking change: new behaviour for the -verbose flag
+
+    Previously, the "-verbose" flag would print the existing stream
+    information, and if a change was requested, it would print the new
+    stream information.
+
+    This behaviour has been removed and the current stream information
+    can be presented with the new "-current" flag. This flag causes
+    StreamTitle to fetch the remote information, display it and exit.
+
+    The "-verbose" flag is now used for displaying additional log
+    messages as StreamTitle does its stuff.
+
+** Profiles
+
+    It is now possible to store profiles in the configuration
+    file. Profiles make easy to reuse the same settings. For instance,
+    if a channel broadcasts different shows but each show uses the
+    same tags, category and title, it is now possible to store the
+    channel information for each show in a profile, and use the new
+    "-profile" flag to change all the stored settings at once.
+
+    Profiles do not require to set all the stream information in the
+    configuration file. In fact, they can omit any key and the
+    previous value for that setting will be kept when changing the
+    channel information into a profile.
+
+    It is posisble to combine the new profile flag with the existing
+    flags to set the title, tags and similar. For instance, the
+    profile can store the category and tags, but let the stream
+    provide the new title each time via the "-title" parameter.
+
+* StreamTitle 0.1.2 (2023-02-11)
+
+    Initial release made available online. It can be used to get the
+    current stream information of a Twitch channel and to update the
+    stream data).

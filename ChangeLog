@@ -1,0 +1,26 @@
+2024-02-18  Dani Rodríguez  <dani@danirod.es>
+
+	* Version 1.0.12 is released.
+
+	* config.go: support for loading profiles in the config file.
+	* info.go: support for setting the stream info from an appProfile.
+	* flag.go: additional flags have been added.
+
+	* config.go: the configuration is now split between config and state.
+	* config.go: the configuration file is now a TOML file.
+	* go.mod: godotenv is not a dependency anymore.
+	* go.mod: but go-toml/v2 is now a dependency.
+
+2024-02-17  Dani Rodríguez  <dani@danirod.es>
+
+	* Changed the project license to GPL-3.0. COPYING and SPDX headers.
+	* Changed upstream URL for the Git repository.
+	* .github/workflows: automatically close incoming pull requests.
+
+	* client.go: the Context struct is now called Client.
+	* client.go: the access token is validated now before use, it also
+	fetches the broadcaster ID from the validation response.
+
+2023-02-11  Dani Rodríguez  <dani@danirod.es>
+
+	* Initial release to the public.

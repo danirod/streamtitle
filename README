@@ -1,41 +1,37 @@
 StreamTitle
 
-  StreamTitle is a little tool that I made so that I can change my stream
-  information from the command line. And if you configure it properly, so it
-  can for you.
+    StreamTitle is a little tool that I made so that I can change my
+    stream information from the command line. And if you configure it
+    properly, so it can for you.
 
-Breaking changes
-
-    If you previously stored the credentials in a file called .StreamTitle.env,
-    you will have to migrate the file to a new file called config.toml, as
-    described below.
-
-    This change was made to accomodate for additional options in the future.
-    Mainly profiles.
 
 How to configure
 
-    Go to the Twitch Developer Console at https://dev.twitch.tv/console and
-    create a new application. The OAuth redirection URL must be set to
-    http://localhost:9300/st-callback but aside from that, you can call the
-    application whatever you want. Grab the client ID and the client secret.
+    Go to the Twitch Developer Console (https://dev.twitch.tv/console)
+    and create a new application. The OAuth redirection URL must be
+    set to http://localhost:9300/st-callback but aside from that, you
+    can call the application whatever you want. Grab the client ID and
+    the client secret.
 
     Create a file in $XDG_CONFIG_DIR/StreamTitle/config.toml with the
     following two lines, having the values that are described below.
     On macOS, the config.toml configuration file has to be created in
     ~/Library/Application Support/StreamTitle/config.toml.
 
-        client_id = 'x'     # the client ID you got from the application
-        client_secret = 'x' # the client secret you got from the application
+        # Replace with the actual values provided by the console
+        client_id = 'x'
+        client_secret = 'x'
+
 
 How to use
 
-    On first start, or if the refresh token expires or gets invalidated, you
-    will be asked to login again or authorize the application. It will print an
-    URL, open it on your browser and authorize the application.
+    On first start, or if the refresh token expires or gets
+    invalidated, you will be asked to login again or authorize the
+    application. It will print an URL, open it on your browser and
+    authorize the application.
 
-    To test the token connection, you can print your stream information
-    with the -current flag.
+    To test the token connection, you can print your stream
+    information with the -current flag.
 
         streamtitle -current
 
@@ -45,35 +41,38 @@ How to use
             Language: en
                 Tags: [Golang Terminal Development]
 
-    You can use one or many flags to change the stream information. You might
-    need to pass the values in quotes to prevent weird things from happening.
+    You can use one or many flags to change the stream
+    information. You might need to pass the values in quotes to
+    prevent weird things from happening.
 
-    * `-title`: set the new stream title: `streamtitle -title "cooking pasta"`
-    * `-game`: set the stream category; you need the category ID (there are
-      Google searches that can tell you the category ID): `streamtitle -game
-      509670`
-    * `-lang`: set the stream language; use two character ISO code:
+    - `-title`: set the new stream title: `streamtitle -title "cooking
+      pasta"`
+    - `-game`: set the stream category; you need the category ID
+      (there are Google searches that can tell you the category ID):
+      `streamtitle -game 509670`
+    - `-lang`: set the stream language; use two character ISO code:
       `streamtitle -lang es`
-    * `-tags`: set the stream tags; provide up to ten alphanumerical strings
-      separated by commas, no spaces: `streamtitle -tags SafeSpace,Role,Retro`
+    - `-tags`: set the stream tags; provide up to ten alphanumerical
+      strings separated by commas, no spaces: `streamtitle -tags
+      SafeSpace,Role,Retro`
 
     A more complete example:
 
         streamtitle -title "cooking pasta" -game 509667 -lang en
 
-    If you find yourself switching between two configurations many times
-    (for instance, if you find yourself changing between two categories or
-    reusing the same set of tags or title for different streams), you might
-    want to look into profiles.
+    If you find yourself switching between two configurations many
+    times (for instance, if you find yourself changing between two
+    categories or reusing the same set of tags or title for different
+    streams), you might want to look into profiles.
 
-    A profile is a prerecorded set of title, category, language and tags,
-    which can be saved in the config file. It is possible to ask StreamTitle
-    to set the channel information from a profile.
+    A profile is a prerecorded set of title, category, language and
+    tags, which can be saved in the config file. It is possible to ask
+    StreamTitle to set the channel information from a profile.
 
-    To create a profile, add a table called "profiles". Each nested table
-    defines a profile called with the key of the profile. Each nested table
-    may have up to 4 keys: title (string), language (string), game (number)
-    and tags (string array).
+    To create a profile, add a table called "profiles". Each nested
+    table defines a profile called with the key of the profile. Each
+    nested table may have up to 4 keys: title (string), language
+    (string), game (number) and tags (string array).
 
         [profiles.cooking]
         game = 509667
@@ -90,39 +89,40 @@ How to use
         tags = ['NoHit', 'NoBackseating', 'DarkSouls']
         language = 'en'
 
-    Properties are not mandatory. You can skip a field, and it will keep the
-    previous value. So for instance if I don't set the language in my profile
-    then it will not update the value for that field; effectively keeping the
-    same language as before.
+    Properties are not mandatory. You can skip a field, and it will
+    keep the previous value. So for instance if I don't set the
+    language in my profile then it will not update the value for that
+    field; effectively keeping the same language as before.
 
-    To use a profile, use the -profile parameter. It will update the channel
-    information to the contents of the profile that has been set.
+    To use a profile, use the -profile parameter. It will update the
+    channel information to the contents of the profile that has been
+    set.
 
         streamtitle -profile darksouls
 
-    You can also merge a profile with inline parameters. Inline parameters
-    always override the profile content, and this is useful for profiles
-    where you just want to change the game and the tags, but you'd want to
-    provide your own title.
+    You can also merge a profile with inline parameters. Inline
+    parameters always override the profile content, and this is useful
+    for profiles where you just want to change the game and the tags,
+    but you'd want to provide your own title.
 
         streamtitle -profile programming -title 'Time to program some Go!'
 
-    You can list your available profiles using the following command. It will
-    print each profile name into a separate line.
+    You can list your available profiles using the following
+    command. It will print each profile name into a separate line.
 
         streamtitle -list-profiles
 
 Debug
 
-    You can always inspect what is the application is doing by using the
-    -verbose flag, which will print additional messages to the terminal as
-    the program does its things, such as login, update the channel information
-    or report errors.
+    You can always inspect what is the application is doing by using
+    the -verbose flag, which will print additional messages to the
+    terminal as the program does its things, such as login, update the
+    channel information or report errors.
 
     You can also use the -dry-run option to avoid updating the stream
-    information. In conjunction, using -verbose -dry-run is a way to check what
-    will the final channel information will be set to without actually
-    changing the values.
+    information. In conjunction, using -verbose -dry-run is a way to
+    check what will the final channel information will be set to
+    without actually changing the values.
 
         streamtitle -dry-run -verbose -profile cooking -title 'Pizza night'
         2024/02/18 Fetching stream information...
