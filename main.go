@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 )
 
 var (
@@ -45,13 +46,16 @@ func main() {
 func newContext() *Client {
 	context, err := NewContext()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 	if err := context.Login(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 	if err := context.FetchStreamInfo(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err.Error())
+		os.Exit(1)
 	}
 	return context
 }

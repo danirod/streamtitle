@@ -3,52 +3,99 @@
 package main
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
+
 	"github.com/adrg/xdg"
-	"github.com/joho/godotenv"
+	toml "github.com/pelletier/go-toml/v2"
 )
 
-const CONFIG_FILE = "StreamTitle/.StreamTitle.env"
+const CONFIG_FILE = "StreamTitle/config.toml"
+const CREDENTIALS_FILE = "StreamTitle/credentials.toml"
 const CLIENT_ID = "CLIENT_ID"
 const CLIENT_SECRET = "CLIENT_SECRET"
-const REFRESH_TOKEN = "REFRESH_TOKEN"
-
-type staticConfig struct {
-	clientId     string // The client ID used in OAuth
-	clientSecret string // the client secret used in OAuth
-	refreshToken string // The refresh token for the session
-}
 
 func configFile() string {
 	file, err := xdg.ConfigFile(CONFIG_FILE)
 	if err != nil {
-		panic(err)
+		logger.Fatal(err)
 	}
 	return file
 }
 
-func (cfg *staticConfig) read() error {
-	file := configFile()
-	logger.Print("Reading config file from ", file)
+func credentialsFile() string {
+	file, err := xdg.StateFile(CREDENTIALS_FILE)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	return file
+}
 
-	conf, err := godotenv.Read(file)
+type appConfig struct {
+	ClientId     string `toml:"client_id"`     // The client ID used in OAuth
+	ClientSecret string `toml:"client_secret"` // the client secret used in OAuth
+}
+
+func (cfg *appConfig) read() error {
+	path := configFile()
+	logger.Print("Reading config file from ", path)
+
+	file, err := os.Open(path)
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
-	cfg.clientId = conf[CLIENT_ID]
-	cfg.clientSecret = conf[CLIENT_SECRET]
-	cfg.refreshToken = conf[REFRESH_TOKEN]
-	return nil
+	decoder := toml.NewDecoder(file)
+	decoder.DisallowUnknownFields()
+	return decoder.Decode(cfg)
 }
 
-func (cfg *staticConfig) write() error {
-	path := configFile()
-	logger.Print("Updating config file at ", path)
+type appState struct {
+	AccessToken  string `toml:"access_token" default:""`  // The last used access token, in case is still valid
+	RefreshToken string `toml:"refresh_token" default:""` // The last used refresh token, in case is still valid
+}
 
-	data := map[string]string{
-		CLIENT_ID:     cfg.clientId,
-		CLIENT_SECRET: cfg.clientSecret,
-		REFRESH_TOKEN: cfg.refreshToken,
+func (state *appState) read() error {
+	path := credentialsFile()
+	logger.Print("Reading credentials from ", path)
+
+	if _, err := os.Stat(path); err == nil {
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		decoder := toml.NewDecoder(file)
+		decoder.DisallowUnknownFields()
+		return decoder.Decode(state)
+	} else if errors.Is(err, os.ErrNotExist) {
+		return nil
+	} else {
+		return err
 	}
-	return godotenv.Write(data, path)
+}
+
+func (state *appState) write() error {
+	path := credentialsFile()
+	logger.Print("Updating credentials in ", path)
+
+	// Make sure that the directory exists.
+	dirname := filepath.Dir(path)
+	if err := os.MkdirAll(dirname, os.ModePerm); err != nil {
+		return err
+	}
+
+	// Create the config file.
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := toml.NewEncoder(file)
+	err = encoder.Encode(state)
+	return err
 }

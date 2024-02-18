@@ -4,6 +4,15 @@ StreamTitle
   information from the command line. And if you configure it properly, so it
   can for you.
 
+Breaking changes
+
+    If you previously stored the credentials in a file called .StreamTitle.env,
+    you will have to migrate the file to a new file called config.toml, as
+    described below.
+
+    This change was made to accomodate for additional options in the future.
+    Mainly profiles.
+
 How to configure
 
     Go to the Twitch Developer Console at https://dev.twitch.tv/console and
@@ -11,21 +20,13 @@ How to configure
     http://localhost:9300/st-callback but aside from that, you can call the
     application whatever you want. Grab the client ID and the client secret.
 
-    Create a file in $XDG_CONFIG_DIR/StreamTitle/StreamTitle.env with the
+    Create a file in $XDG_CONFIG_DIR/StreamTitle/config.toml with the
     following two lines, having the values that are described below.
-    On macOS, the StreamTitle.env configuration file has to be created in
-    ~/Library/Application Support/StreamTitle/StreamTitle.env.
+    On macOS, the config.toml configuration file has to be created in
+    ~/Library/Application Support/StreamTitle/config.toml.
 
-        CLIENT_ID=
-        CLIENT_SECRET=
-
-    * CLIENT_ID: the client ID you got from the application
-    * CLIENT_SECRET: the client secret you got from the application
-
-    Something like:
-
-        CLIENT_ID=xxxxxxxxx
-        CLIENT_SECRET=yyyyyyyyyy
+        client_id = 'x'     # the client ID you got from the application
+        client_secret = 'x' # the client secret you got from the application
 
 How to use
 

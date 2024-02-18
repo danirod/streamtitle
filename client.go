@@ -10,14 +10,13 @@ import (
 
 // Client is the data structure that groups all the program state.
 type Client struct {
-	// A facade for the following collaborators.
-	client     *helix.Client // The HTTP client used to interact with Twitch.
-	config     staticConfig  // The static config information in the environment.
-	streamInfo streamInfo    // The stream information object.
+	client *helix.Client // The HTTP client used to interact with Twitch.
 
-	// Some transient information that is only valid for this session.
-	accessToken string // The access token received during bot startup.
-	broadcastId string // The broadcast ID, which depends on the login.
+	config      appConfig // The static config information in the environment.
+	state       appState  // The state (credentials and such)
+	broadcastId string    // The broadcast ID for the current token
+
+	streamInfo streamInfo // The stream information object.
 }
 
 // NewContext builds a new context and returns the outcome.
@@ -27,10 +26,13 @@ func NewContext() (*Client, error) {
 	if err := ctx.config.read(); err != nil {
 		return nil, err
 	}
+	if err := ctx.state.read(); err != nil {
+		return nil, err
+	}
 
 	client, err := helix.NewClient(&helix.Options{
-		ClientID:     ctx.config.clientId,
-		ClientSecret: ctx.config.clientSecret,
+		ClientID:     ctx.config.ClientId,
+		ClientSecret: ctx.config.ClientSecret,
 		RedirectURI:  "http://localhost:9300/st-callback",
 	})
 	if err != nil {
@@ -41,40 +43,98 @@ func NewContext() (*Client, error) {
 	return &ctx, nil
 }
 
+// refreshToken tries to use the given refresh token to get a new pair of
+// access and refresh token. If the token cannot be refreshed because the
+// token is not valid, a separate flag will be raised and the strings will
+// be empty. If there is an issue during the token refresh, it will return
+// the corresponding error.
+func (ctx *Client) refreshToken(token string) (bool, string, string, error) {
+	logger.Print("Using the refresh token...")
+
+	if resp, err := ctx.client.RefreshUserAccessToken(token); err != nil {
+		return false, "", "", err
+	} else {
+		if resp.Error == "" {
+			return true, resp.Data.AccessToken, resp.Data.RefreshToken, nil
+		} else {
+			return false, "", "", nil
+		}
+	}
+}
+
+// Tries to finalize the login by checking the validity of the token. If the token
+// is valid, it will also set the owner of the token as the broadcaster ID field
+// in the local client structure.
+func (ctx *Client) finishLogin(token string) (bool, error) {
+	logger.Print("Validating access token...")
+	if valid, response, err := ctx.client.ValidateToken(token); err != nil {
+		return false, err
+	} else if valid {
+		logger.Print("Token is valid and belongs to ", response.Data.Login)
+		ctx.broadcastId = response.Data.UserID
+		ctx.client.SetUserAccessToken(token)
+		return true, nil
+	} else {
+		logger.Print("Access token is not valid (maybe expired?")
+		return false, nil
+	}
+}
+
 // Login will initialise the client state so that there exists a valid access
 // token in the client context which can be used by further API calls made
 // within the client.
 func (ctx *Client) Login() error {
 	logger.Print("Prepare for login")
 
-	callback := make(chan string)
-	go createTokenProvider(ctx, callback)
-	ctx.accessToken = <-callback
-	ctx.client.SetUserAccessToken(ctx.accessToken)
-	logger.Print("Access token has been set")
+	// Check if the token in the app state is still valid
+	if ctx.state.AccessToken != "" {
+		if valid, err := ctx.finishLogin(ctx.state.AccessToken); err != nil {
+			return err
+		} else if valid {
+			return nil
+		}
 
-	bid, err := ctx.getTokenOwner()
-	if err != nil {
+		// So the access token is not valid. Is the refresh token valid?
+		if ctx.state.RefreshToken != "" {
+			if valid, access, refresh, err := ctx.refreshToken(ctx.state.RefreshToken); err != nil {
+				return err
+			} else if valid {
+				logger.Print("A new token has been generated")
+				ctx.state.AccessToken = access
+				ctx.state.RefreshToken = refresh
+				if err := ctx.state.write(); err != nil {
+					return err
+				}
+				if valid, err := ctx.finishLogin(access); err != nil {
+					return err
+				} else if valid {
+					return nil
+				}
+			} else {
+				logger.Print("Refresh token is not valid")
+			}
+		}
+	} else {
+		logger.Print("No access token found in the application state")
+	}
+
+	// The user has to log in
+	callback := make(chan loginTokens)
+	go spawnAuthorizationServer(ctx, callback)
+	tokens := <-callback
+	ctx.state.AccessToken = tokens.accessToken
+	ctx.state.RefreshToken = tokens.refreshToken
+	if err := ctx.state.write(); err != nil {
 		return err
 	}
-	ctx.broadcastId = bid
-	logger.Print("Broadcast ID set to ", bid)
-	return nil
-}
-
-// Uses the validation endpoint to check the token information, and as
-// a side effect it serves as a validation that the token is OK.
-func (ctx *Client) getTokenOwner() (string, error) {
-	logger.Print("Validating access token...")
-	valid, resp, err := ctx.client.ValidateToken(ctx.accessToken)
-	if err != nil {
-		return "", err
+	if valid, err := ctx.finishLogin(ctx.state.AccessToken); err != nil {
+		return err
+	} else if valid {
+		return nil
+	} else {
+		// I am out of ideas, man!
+		return errors.New("cannot issue a valid access token")
 	}
-	if !valid {
-		return "", errors.New("The token is not valid")
-	}
-	logger.Print("Access token belongs to ", resp.Data.Login)
-	return resp.Data.UserID, nil
 }
 
 // AuthorizationURL will build the URL that the user has to visit in order
