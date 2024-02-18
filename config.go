@@ -13,8 +13,6 @@ import (
 
 const CONFIG_FILE = "StreamTitle/config.toml"
 const CREDENTIALS_FILE = "StreamTitle/credentials.toml"
-const CLIENT_ID = "CLIENT_ID"
-const CLIENT_SECRET = "CLIENT_SECRET"
 
 func configFile() string {
 	file, err := xdg.ConfigFile(CONFIG_FILE)
